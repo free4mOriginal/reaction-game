@@ -1,0 +1,245 @@
+<html>
+  <title>JavaScript test</title>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat|Major+Mono+Display" rel="stylesheet">
+
+    <style type="text/css">
+
+      body {
+        padding: 0;
+        margin: 0;
+        font-family: 'Montserrat', sans-serif;
+        text-align: center;
+        font-size: 24pt;
+      }
+      p.sides {
+        font-size: 60pt;
+        font-weight: 900;
+        color: #eaeaea;
+        text-align: center;
+      }
+      #gameDivContainer {
+        margin: auto;
+        width: 704px;
+        height: 444px;
+        position: relative;
+        top: 100px;
+        border: 2px dotted #dddddd;
+        text-align: center;
+        font-size: 12pt;
+      }
+      #gameDivContainerPositioning {
+        position: relative;
+        top: 150px;
+      }
+      #leftDiv {
+        position: fixed;
+        width: 25%;
+        height: 100%;
+      }
+      #rightDiv {
+        position: fixed;
+        right: 0;
+        width: 25%;
+        height: 100%;
+      }
+      #time {
+        position: relative;
+        top: 80px;
+        font-family: 'Major Mono Display', monospace;
+        color: #cccccc;
+      }
+      .circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50px;
+        margin: 20px;
+        display: inline-block;
+      }
+      .circle#red {
+        background-color:tomato;
+        position: relative;
+      }
+      .circle#blue {
+        background-color: SteelBlue;
+      }
+      .circle#green {
+        background-color:olive;
+      }
+      .circle#yellow {
+        background-color:gold;
+      }
+      #gamePiece {
+        width: 100px;
+        height: 100px;
+        border-radius: 50px;
+        background-color: tomato;
+        position: relative;
+        z-index: 10;
+      }
+      a#offButton {
+        font-size: 80px;
+        text-decoration: none;
+        color: #000;
+      }
+      #scores {
+        font-size: 10pt;
+        text-align: left;
+        line-height: 0.5;
+        width: 100px;
+        position: fixed;
+        top: 100px;
+        left: 50px;
+      }
+      #instructions {
+        font-size: 16pt;
+        text-align: center;
+        height: 10px;
+        position: relative;
+        top: 70px;
+      }
+      .grey {
+        color: #cccccc;
+      }
+    </style>
+  </head>
+
+  <body>
+
+      <div id="instructions">
+        <span>O <span class="grey">score</span> &Oslash; <span class="grey">stop/start</span></span>
+      </div>
+
+      <div id="leftDiv">
+        <p class="sides">R<br>E<br>A<br>C<br>T</p>
+      </div>
+
+      <div id="rightDiv">
+        <div id="scores"></div>
+        <p class="sides">G<br>A<br>M<br>E<br><a href="#" id="offButton">&Oslash;</a></p>
+      </div>
+
+      <div id="gameDivContainer">
+        <div id="gameDivContainerPositioning">
+          <div class="circle" id="red"></div>
+          <div class="circle" id="blue"></div>
+          <div class="circle" id="green"></div>
+          <div class="circle" id="yellow"></div>
+        </div>
+        <div id="gamePiece"></div>
+      </div>
+
+    <div>
+      <p id="time">0.000 sec</p>
+    </div>
+
+    <script type="text/javascript">
+      let timerSwitch;
+      let time = 0;
+      let recordedScore = [];
+      let recordedColor = [];
+      let bestScore = 0;
+      let bestColor = '';
+      let finalScoreText = '';
+
+      document.getElementById('gamePiece').style.visibility='hidden';
+
+      document.getElementById('red').onmouseover = (() => document.getElementById('red').style.backgroundColor = "#fff");
+      document.getElementById('blue').onmouseover = (() => document.getElementById('blue').style.backgroundColor = "#fff");
+      document.getElementById('green').onmouseover = (() => document.getElementById('green').style.backgroundColor = "#fff");
+      document.getElementById('yellow').onmouseover = (() => document.getElementById('yellow').style.backgroundColor = "#fff");
+
+      document.getElementById('red').onmouseout = (() => document.getElementById('red').style.backgroundColor = "tomato");
+      document.getElementById('blue').onmouseout = (() => document.getElementById('blue').style.backgroundColor = "steelblue");
+      document.getElementById('green').onmouseout = (() => document.getElementById('green').style.backgroundColor = "olive");
+      document.getElementById('yellow').onmouseout = (() => document.getElementById('yellow').style.backgroundColor = "gold");
+
+      document.getElementById('red').onclick = firstPlay;
+      document.getElementById('blue').onclick = firstPlay;
+      document.getElementById('green').onclick = firstPlay;
+      document.getElementById('yellow').onclick = firstPlay;
+
+      function firstPlay() {
+        document.getElementById('gameDivContainerPositioning').style.display = 'none';
+        document.getElementById('gamePiece').style.visibility = 'visible';
+        mainPlayFunc();
+      };
+
+      function startTimer() {
+        let startTime = new Date().getTime();
+        let interval = setInterval(runningTimer, 76, startTime);
+        return interval;
+      };
+            function runningTimer(start) {
+              let stop = new Date().getTime();
+              time =  ((stop - start) / 1000).toFixed(3);
+              document.getElementById("time").innerHTML = time + ' sec';
+            };
+
+      function mainPlayFunc() {
+        document.getElementById('gamePiece').onclick = (() => {
+          setRandomness();
+          clearInterval(timerSwitch);
+
+          let p = document.createElement('p');
+          let newScore = document.createTextNode(time);
+          p.appendChild(newScore);
+          document.getElementById('scores').appendChild(p);
+          recordedScore.push(time);
+
+          timerSwitch = startTimer();
+        });
+
+        /*
+        let randomStart = Math.floor(Math.random()*1000);
+
+        setTimeout(() => {
+          clearInterval(timerSwitch);
+          timerSwitch = startTimer();
+          setRandomness();
+        }, randomStart);
+        */
+
+        document.getElementById('offButton').onclick = (() => {
+          clearInterval(timerSwitch);
+          document.getElementById('gamePiece').style.display = "none";
+          gameEndStart();
+        });
+      };
+
+      function setRandomness() {
+        let width = Math.floor(Math.random() * 90) + 10;
+        document.getElementById('gamePiece').style.width = width;
+        document.getElementById('gamePiece').style.height = width;
+        document.getElementById('gamePiece').style.top = Math.floor(Math.random() * 490) - width;
+        document.getElementById('gamePiece').style.left = Math.floor(Math.random() * 750) - width;
+
+        const colors = ['tomato', 'SteelBlue', 'olive', 'gold'];
+        let randomNumber = Math.floor(Math.random() * 3);
+        randomColor = colors[randomNumber];
+        recordedColor.push(randomColor);
+        document.getElementById('gamePiece').style.backgroundColor = randomColor;
+      };
+
+      function gameEndStart() {
+        if (!(document.getElementById('instructions').innerHTML === finalScoreText)) {
+          recordedColor.pop();
+          recordedScore.shift();
+          bestScore = recordedScore[0];
+          for (let i=0; i<recordedScore.length; i++) {
+            if (recordedScore[i] <= bestScore) {
+              bestScore = recordedScore[i];
+              bestColor = recordedColor[i];
+            }
+          };
+
+          finalScoreText = `Your best score is - ${bestScore}, ${bestColor} color.`;
+          document.getElementById('instructions').innerHTML = finalScoreText;
+        } else {
+          location.reload(true);
+        }
+      };
+    </script>
+
+  </body>
+</html>
